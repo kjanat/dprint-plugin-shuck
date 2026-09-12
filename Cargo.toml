@@ -1,0 +1,49 @@
+[package]
+name         = "dprint-plugin-shuck"
+version      = "0.1.0"
+edition      = "2024"
+rust-version = "1.94.1"
+description  = "A dprint Wasm plugin for shell scripts using Shuck"
+readme       = "README.md"
+repository   = "https://github.com/kjanat/dprint-plugin-shuck"
+license      = "MIT"
+keywords     = ["dprint", "formatter", "shell", "wasm", "zsh"]
+categories   = ["development-tools", "text-editors"]
+publish      = false
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[[bin]]
+name              = "generate-schema"
+required-features = ["schema"]
+
+[dependencies]
+anyhow           = "1"
+dprint-core      = { version = "0.69.1", features = ["wasm"] }
+json-schema-sort = { version = "0.1", default-features = false, optional = true }
+schemars         = { version = "1", optional = true }
+serde            = { version = "1", features = ["derive"] }
+serde_json       = "1"
+shuck-formatter  = "=0.2.2"
+
+[features]
+schema = ["dep:json-schema-sort", "dep:schemars"]
+
+[lints.clippy]
+all                     = { level = "deny", priority = -1 }
+cargo                   = { level = "deny", priority = -1 }
+multiple_crate_versions = "allow"
+nursery                 = { level = "deny", priority = -1 }
+pedantic                = { level = "deny", priority = -1 }
+
+[lints.rust]
+warnings = "deny"
+
+[profile.wasm-release]
+inherits      = "release"
+opt-level     = "z"
+strip         = true
+lto           = "fat"
+panic         = "abort"
+codegen-units = 1

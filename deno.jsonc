@@ -1,0 +1,11 @@
+{
+	"imports": {
+		"@dprint/formatter": "jsr:@dprint/formatter@0.5.1",
+		"@std/assert": "jsr:@std/assert@1",
+		"@std/toml": "jsr:@std/toml@1"
+	},
+	"tasks": {
+		"e2e": "deno test --frozen --allow-read --allow-write --allow-run=dprint --allow-net=127.0.0.1 scripts/e2e.ts --",
+		"verify-release": "deno run --frozen --allow-read scripts/verify-release.ts"
+	}
+}

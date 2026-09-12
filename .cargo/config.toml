@@ -1,0 +1,8 @@
+[alias]
+lint      = "clippy --locked --workspace --all-targets --all-features"
+lint-wasm = "clippy --locked --lib --target wasm32-unknown-unknown --all-features"
+schema    = "run --locked --features schema --bin generate-schema"
+wasm      = "build --locked --lib --profile wasm-release --target wasm32-unknown-unknown"
+
+[target.wasm32-unknown-unknown]
+rustflags = ["-Clink-args=-z stack-size=10485760"]

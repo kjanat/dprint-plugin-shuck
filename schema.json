@@ -1,0 +1,100 @@
+{
+  "$id": "https://plugins.dprint.dev/kjanat/shuck/0.1.0/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "Dialect": {
+      "description": "Shell dialect selection. Auto delegates filename and shebang inference to Shuck.",
+      "oneOf": [
+        {
+          "description": "Infer from the shebang and file extension.",
+          "type": "string",
+          "const": "auto"
+        },
+        {
+          "description": "Bash shell syntax.",
+          "type": "string",
+          "const": "bash"
+        },
+        {
+          "description": "POSIX shell syntax.",
+          "type": "string",
+          "const": "posix"
+        },
+        {
+          "description": "`MirBSD` Korn shell syntax.",
+          "type": "string",
+          "const": "mksh"
+        },
+        {
+          "description": "Z shell syntax.",
+          "type": "string",
+          "const": "zsh"
+        }
+      ]
+    }
+  },
+  "title": "Configuration",
+  "description": "Shuck formatting options. Plugin values override inherited global indentation.",
+  "type": "object",
+  "properties": {
+    "binaryNextLine": {
+      "description": "Place binary operators at the start of continuation lines.",
+      "default": false,
+      "type": "boolean"
+    },
+    "dialect": {
+      "$ref": "#/$defs/Dialect",
+      "description": "Shell dialect; auto uses Shuck's shebang and extension inference.",
+      "default": "auto"
+    },
+    "functionNextLine": {
+      "description": "Place function opening braces on a new line.",
+      "default": false,
+      "type": "boolean"
+    },
+    "indentWidth": {
+      "description": "Spaces per indent, from 1 to 255; inherits global indentWidth.",
+      "default": 8,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 255,
+      "format": "uint8"
+    },
+    "keepPadding": {
+      "description": "Preserve safe horizontal padding.",
+      "default": false,
+      "type": "boolean"
+    },
+    "minify": {
+      "description": "Minify output; also enables upstream simplifications.",
+      "default": false,
+      "type": "boolean"
+    },
+    "neverSplit": {
+      "description": "Prefer compact layouts.",
+      "default": false,
+      "type": "boolean"
+    },
+    "simplify": {
+      "description": "Apply upstream shell syntax simplifications.",
+      "default": false,
+      "type": "boolean"
+    },
+    "spaceRedirects": {
+      "description": "Insert spaces around redirection operators.",
+      "default": false,
+      "type": "boolean"
+    },
+    "switchCaseIndent": {
+      "description": "Indent case branch bodies.",
+      "default": false,
+      "type": "boolean"
+    },
+    "useTabs": {
+      "description": "Use tabs for indentation; inherits the global useTabs setting.",
+      "default": true,
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false
+}
