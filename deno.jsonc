@@ -5,7 +5,10 @@
 		"@std/toml": "jsr:@std/toml@1"
 	},
 	"tasks": {
+		"wasm": "cargo wasm && deno task optimize-wasm",
+		"optimize-wasm": "deno run --frozen --allow-read --allow-write --allow-env npm:binaryen@116.0.0/bin/wasm-opt -Oz --enable-bulk-memory --enable-sign-ext --enable-nontrapping-float-to-int target/wasm32-unknown-unknown/wasm-release/dprint_plugin_shuck.wasm -o plugin.wasm",
 		"e2e": "deno test --frozen --allow-read --allow-write --allow-run=dprint --allow-net=127.0.0.1 scripts/e2e.ts --",
-		"verify-release": "deno run --frozen --allow-read scripts/verify-release.ts"
+		"verify-release": "deno run --frozen --allow-read scripts/verify-release.ts",
+		"release-notes": "deno run --frozen --allow-read --allow-write scripts/release-notes.ts"
 	}
 }

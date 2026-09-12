@@ -25,6 +25,8 @@ jobs:
         env:
           RELEASE_TAG: ${{ github.ref_name }}
         run: deno task verify-release "${RELEASE_TAG}"
+      - name: Generate release notes
+        run: deno task release-notes
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -32,4 +34,4 @@ jobs:
         run: |
           gh release create "${RELEASE_TAG}" artifact/plugin.wasm artifact/schema.json \
             --verify-tag --title "${RELEASE_TAG}" --generate-notes \
-            --notes 'Install with dprint add kjanat/shuck. Formats shell scripts using Shuck. See README.md and schema.json for configuration.'
+            --notes-file artifact/release-notes.md
