@@ -18,9 +18,7 @@ const upstreamVersion = upstream[0].version;
 assert(info.updateUrl && info.updateUrl.endsWith('/latest.json'), 'Expected a dprint plugin update URL.');
 const proxyBase = info.updateUrl.slice(0, -'/latest.json'.length);
 const slug = new URL(proxyBase).pathname.slice(1);
-const hash = new Uint8Array(await crypto.subtle.digest('SHA-256', wasm));
-const checksum = Array.from(hash, (byte) => byte.toString(16).padStart(2, '0')).join('');
-const pluginUrl = `${proxyBase}-${info.version}.wasm@${checksum}`;
+const pluginUrl = `${proxyBase}-${info.version}.wasm`;
 const config = JSON.stringify({ plugins: [pluginUrl] }, null, 2);
 
 formatter.setConfig({}, {});
@@ -40,7 +38,7 @@ Already using the plugin? Run \`dprint config update\`.
 
 ## Pin this version
 
-Add this checksum-pinned entry to your dprint configuration:
+Add this entry to your dprint configuration to use version ${info.version}:
 
 ~~~json
 ${config}

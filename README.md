@@ -79,7 +79,7 @@ The optional Wasm path is relative to the repository root.
 Push an authorized bare semver tag matching Cargo's version (for example `0.1.0`)
 to run the release workflow. It tests the plugin and publishes `plugin.wasm` and
 `schema.json`. Release notes are generated from the built Wasm, schema, and
-`Cargo.lock`: installation, a checksum-pinned plugin URL, the bundled Shuck
+`Cargo.lock`: installation, a versioned plugin URL, the bundled Shuck
 version, supported extensions, and artifact size. GitHub appends the changelog
 automatically. No release-note text needs updating when the version changes.
 
