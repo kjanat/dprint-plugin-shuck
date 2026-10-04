@@ -41,7 +41,7 @@ alias        = "b"
 depends      = ["build-wasm"]
 depends_post = ["schema:gen"]
 vars         = {
-  optflags = "-Oz --enable-bulk-memory --enable-sign-ext --enable-nontrapping-float-to-int",
+  optflags = "--enable-bulk-memory-opt --flatten --rereloop -Oz -Oz",
   in       = "target/{{vars.target}}/{{vars.profile}}/{{vars.wasm}}",
   out      = "plugin.wasm",
 }
