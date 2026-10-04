@@ -4,17 +4,14 @@ on:
     branches: [master]
   pull_request:
   workflow_call:
-permissions:
-  contents: read
+permissions: { contents: read }
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@1.98.0
-        with:
-          components: clippy, rustfmt
-          targets: wasm32-unknown-unknown
+      - uses: &CHECKOUT actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067
+        with: { components: "clippy, rustfmt", targets: "wasm32-unknown-unknown", toolchain: "nightly-2026-09-24"}
       - uses: Swatinem/rust-cache@v2
       - run: cargo fmt --all --check
       - run: cargo test --locked
@@ -22,32 +19,23 @@ jobs:
       - run: cargo lint-wasm
       - run: cargo schema
       - run: git diff --exit-code -- schema.json
-      - uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.9.6
+      - &DENO
+        uses: denoland/setup-deno@v2
+        with: { deno-version: "v2.9.6" }
       - run: deno task wasm
       - uses: actions/upload-artifact@v7
-        with:
-          name: plugin
-          path: |
-            plugin.wasm
-            schema.json
-          if-no-files-found: error
+        with: { name: plugin, path: "plugin.wasm\nschema.json", if-no-files-found: error }
+          
   e2e:
     needs: validate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: *CHECKOUT
       - uses: actions/download-artifact@v8
-        with:
-          name: plugin
-          path: artifact
+        with: { name: plugin, path: artifact }
       - uses: kjanat/install-dprint@v2
-        with:
-          version: "0.57.4"
-      - uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.9.6
+        with: { version: "0.57.4" }
+      - *DENO
       - run: deno check --frozen scripts/*.ts
       - run: deno lint scripts/
       - run: deno task e2e artifact/plugin.wasm
