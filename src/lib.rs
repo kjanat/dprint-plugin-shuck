@@ -33,12 +33,7 @@ impl SyncPluginHandler<Configuration> for PluginHandler {
         }
     }
     fn license_text(&mut self) -> String {
-        concat!(
-            include_str!("../LICENSE"),
-            "\n",
-            include_str!("../LICENSE-SHUCK")
-        )
-        .into()
+        include_str!("../LICENSE").into()
     }
     fn resolve_config(
         &mut self,
