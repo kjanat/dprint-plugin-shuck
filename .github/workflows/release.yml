@@ -6,12 +6,13 @@ jobs:
   release:
     needs: validate
     runs-on: ubuntu-latest
+    if: github_repository == 'kjanat/dprint-plugin-shuck'
     permissions: { contents: write }
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/download-artifact@v8
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with: { name: plugin, path: artifact }
-      - uses: denoland/setup-deno@v2
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2
         with: { deno-version: "v2.9.6" }
       - name: Verify version
         env: { RELEASE_TAG: "${{ github.ref_name }}" }
