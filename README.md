@@ -1,93 +1,86 @@
 # dprint-plugin-shuck
 
-A sandboxed Wasm [dprint](https://dprint.dev) plugin wrapping
-[Shuck](https://github.com/ewhauser/shuck)'s Rust shell formatter (0.2.2).
+A [dprint](https://dprint.dev) plugin for formatting shell scripts with
+[Shuck](https://github.com/ewhauser/shuck). The formatter runs inside dprint's
+WebAssembly sandbox; no separate Shuck executable is needed.
 
 ## Installation
 
-After the first release is published:
+Add the plugin to your dprint configuration:
 
 ```sh
 dprint add kjanat/shuck
 ```
 
-For local development, run `deno task wasm` and add `./plugin.wasm`
-to your dprint configuration's `plugins` array.
+Format your files, or check their formatting without modifying them:
 
-```json
-{
-	"shuck": {
-		"useTabs": false,
-		"indentWidth": 2,
-		"dialect": "auto"
-	},
-	"plugins": ["./plugin.wasm"]
-}
+```sh
+dprint fmt
+dprint check
 ```
+
+To update the plugin, run `dprint config update`. Each release's notes include
+its bundled Shuck version and a URL for pinning that plugin version.
 
 ## Configuration
 
-See [schema.json](schema.json) for all options, descriptions, and upstream-derived
-defaults. Plugin `useTabs` and `indentWidth` override dprint globals. Remaining
-options mirror Shuck: `dialect`, `binaryNextLine`, `switchCaseIndent`,
-`spaceRedirects`, `keepPadding`, `functionNextLine`, `neverSplit`, `simplify`,
-and `minify`. Simplification and minification are opt-in upstream transformations.
+Add a `shuck` section to your existing dprint configuration, keeping the
+`plugins` entry installed by `dprint add`:
 
-Shuck infers the dialect from shebangs and file extensions, or accepts `bash`,
-`posix`, `mksh`, and `zsh` explicitly. Default extensions are `sh`, `bash`, `zsh`,
-`dash`, `mksh`, and `bats`. Generic `ksh` is excluded because the formatter does
-not support generic Korn shell. Use dprint's additive `associations` for extensionless
-scripts and dotfiles, with an explicit dialect where needed. Negated associations
-remove default matches. dprint per-file `overrides` are supported.
-
-Shuck preserves source line endings. Its public formatter options do not expose
-line-ending or wrapping-width overrides, so `newLineKind` and `lineWidth` are not
-mapped. No project or user Shuck configuration is read. This plugin formats
-standalone shell scripts; it does not run linting or rewrite embedded shell in YAML.
-Shuck 0.2.2 rejects some CRLF shell constructs, including the function fixture
-covered in the tests; these upstream parse errors are propagated unchanged.
-Range formatting is unsupported and returns no change. Parse errors are reported
-without rewriting the input. Upstream describes its formatter CLI as experimental.
-
-## Development
-
-```sh
-cargo test --locked
-cargo fmt --all --check
-cargo lint
-cargo lint-wasm
-cargo schema
-deno task wasm
-deno task e2e plugin.wasm
+```jsonc
+{
+  "shuck": {
+    "useTabs": false,
+    "indentWidth": 2,
+    "dialect": "auto"
+  }
+}
 ```
 
-The Wasm build uses fat LTO, then Binaryen 116's `wasm-opt -Oz` to produce
-`plugin.wasm`. The optimizer is pinned in `deno.lock` and runs through Deno;
-no separate native Binaryen installation is needed. CI tests and releases this
-optimized artifact. `cargo wasm` remains available for the compiler output.
+All options are optional. `useTabs` and `indentWidth` inherit dprint's global
+settings unless overridden in `shuck`; otherwise, Shuck's defaults apply.
+See [schema.json](schema.json) for the full option descriptions and defaults.
 
-The schema is generated from the configuration type; CI checks for drift.
-The TypeScript tests run on Deno and load the compiled Wasm through
-`@dprint/formatter` to check formatting, idempotence, configuration, and errors.
-They also exercise the dprint CLI for associations, per-file overrides, checksum
-installation, and a local config-update dry run. Deno and dprint must be installed.
-To test a release artifact directly, run `deno task e2e artifact/plugin.wasm`.
-The optional Wasm path is relative to the repository root.
+| Option             | Purpose                                                                                       |
+| ------------------ | --------------------------------------------------------------------------------------------- |
+| `dialect`          | Infer from the shebang and filename with `auto`, or select `bash`, `posix`, `mksh`, or `zsh`. |
+| `useTabs`          | Use tabs for indentation.                                                                     |
+| `indentWidth`      | Set the number of spaces per indent, from 1 to 255.                                           |
+| `binaryNextLine`   | Place binary operators at the start of continuation lines.                                    |
+| `switchCaseIndent` | Indent case branch bodies.                                                                    |
+| `spaceRedirects`   | Insert spaces around redirection operators.                                                   |
+| `keepPadding`      | Preserve safe horizontal padding.                                                             |
+| `functionNextLine` | Place function opening braces on a new line.                                                  |
+| `neverSplit`       | Prefer compact layouts.                                                                       |
+| `simplify`         | Apply Shuck's shell syntax simplifications.                                                   |
+| `minify`           | Minify output and enable simplifications.                                                     |
 
-## Releases
+Simplification and minification are opt-in. The plugin reads its settings from
+dprint; it does not load Shuck project or user configuration files.
 
-Push an authorized bare semver tag matching Cargo's version (for example `0.1.0`)
-to run the release workflow. It tests the plugin and publishes `plugin.wasm` and
-`schema.json`. Release notes are generated from the built Wasm, schema, and
-`Cargo.lock`: installation, a versioned plugin URL, the bundled Shuck
-version, supported extensions, and artifact size. GitHub appends the changelog
-automatically. No release-note text needs updating when the version changes.
+### File matching
 
-To preview the notes, put `plugin.wasm` and `schema.json` in a directory and run
-`deno task release-notes path/to/directory`. The generated `release-notes.md`
-is written to that directory. Published artifacts are immutable: fixes require
-a new version. No npm package is advertised.
+The plugin matches `.sh`, `.bash`, `.zsh`, `.dash`, `.mksh`, and `.bats` files
+by default. Use dprint's `associations` setting to include extensionless scripts
+and dotfiles, or negated associations to exclude default matches. Per-file
+`overrides` can select a dialect or other formatting options for specific files.
+
+Generic `.ksh` files are not matched because Shuck does not support generic Korn
+shell syntax. Select `mksh` explicitly for compatible scripts when needed.
+
+### Limitations
+
+The plugin formats standalone shell scripts. It does not run Shuck's linter or
+format shell embedded in YAML. Range formatting leaves the file unchanged.
+
+Shuck preserves source line endings; the plugin does not map dprint's
+`newLineKind` or `lineWidth` settings. Some CRLF constructs produce upstream
+parse errors, which are reported without rewriting the input.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development, testing, and release instructions.
 
 ## License
 
-MIT. Shuck and bundled dependencies retain their respective licenses.
+[MIT](LICENSE).

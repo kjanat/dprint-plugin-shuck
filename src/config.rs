@@ -204,6 +204,7 @@ pub(crate) fn resolve_config(
                 .map(str::to_owned)
                 .collect(),
             file_names: Vec::new(),
+            additive: false,
         },
     }
 }

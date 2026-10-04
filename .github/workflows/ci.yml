@@ -1,53 +1,40 @@
 name: CI
 on:
-  push:
-    branches: [master]
+  push: { branches: [master] }
   pull_request:
   workflow_call:
-permissions:
-  contents: read
+permissions: { contents: read }
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@1.98.0
-        with:
-          components: clippy, rustfmt
-          targets: wasm32-unknown-unknown
-      - uses: Swatinem/rust-cache@v2
+      - uses: &CHECKOUT actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067
+        with: { components: "clippy, rustfmt", targets: "wasm32-unknown-unknown", toolchain: "nightly-2026-09-24" }
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
       - run: cargo fmt --all --check
       - run: cargo test --locked
       - run: cargo lint
       - run: cargo lint-wasm
       - run: cargo schema
       - run: git diff --exit-code -- schema.json
-      - uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.9.6
+      - &DENO
+        uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2
+        with: { deno-version: "v2.9.6" }
       - run: deno task wasm
-      - uses: actions/upload-artifact@v7
-        with:
-          name: plugin
-          path: |
-            plugin.wasm
-            schema.json
-          if-no-files-found: error
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with: { name: plugin, path: "plugin.wasm\nschema.json", if-no-files-found: error }
+
   e2e:
     needs: validate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/download-artifact@v8
-        with:
-          name: plugin
-          path: artifact
+      - uses: *CHECKOUT
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with: { name: plugin, path: artifact }
       - uses: kjanat/install-dprint@v2
-        with:
-          version: "0.57.4"
-      - uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.9.6
+        with: { version: "0.57.4" }
+      - *DENO
       - run: deno check --frozen scripts/*.ts
       - run: deno lint scripts/
       - run: deno task e2e artifact/plugin.wasm

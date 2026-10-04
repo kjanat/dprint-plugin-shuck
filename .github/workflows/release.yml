@@ -1,37 +1,27 @@
 name: Release
-on:
-  push:
-    tags: ["[0-9]+.[0-9]+.[0-9]+"]
-permissions:
-  contents: read
+on: { push: { tags: ["[0-9]+.[0-9]+.[0-9]+"] } }
+permissions: { contents: read }
 jobs:
-  validate:
-    uses: ./.github/workflows/ci.yml
+  validate: { uses: $/.github/workflows/ci.yml }
   release:
     needs: validate
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    if: github_repository == 'kjanat/dprint-plugin-shuck'
+    permissions: { contents: write }
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/download-artifact@v8
-        with:
-          name: plugin
-          path: artifact
-      - uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.9.6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with: { name: plugin, path: artifact }
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2
+        with: { deno-version: "v2.9.6" }
       - name: Verify version
-        env:
-          RELEASE_TAG: ${{ github.ref_name }}
+        env: { RELEASE_TAG: "${{ github.ref_name }}" }
         run: deno task verify-release "${RELEASE_TAG}"
       - name: Generate release notes
         run: deno task release-notes
       - name: Publish release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ github.ref_name }}
-        run: |
-          gh release create "${RELEASE_TAG}" artifact/plugin.wasm artifact/schema.json \
-            --verify-tag --title "${RELEASE_TAG}" --generate-notes \
-            --notes-file artifact/release-notes.md
+        env: { GH_TOKEN: "${{ github.token }}", RELEASE_TAG: "${{ github.ref_name }}" }
+        run: gh release create "${RELEASE_TAG}"
+          artifact/plugin.wasm artifact/schema.json
+          --verify-tag --title "${RELEASE_TAG}" --generate-notes
+          --notes-file artifact/release-notes.md

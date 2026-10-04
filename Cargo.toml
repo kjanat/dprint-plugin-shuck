@@ -1,8 +1,8 @@
 [package]
 name         = "dprint-plugin-shuck"
-version      = "0.1.1"
+version      = "0.1.2"
 edition      = "2024"
-rust-version = "1.94.1"
+rust-version = "1.99.0"
 description  = "A dprint Wasm plugin for shell scripts using Shuck"
 readme       = "README.md"
 repository   = "https://github.com/kjanat/dprint-plugin-shuck"
@@ -20,12 +20,12 @@ required-features = ["schema"]
 
 [dependencies]
 anyhow           = "1"
-dprint-core      = { version = "0.69.1", features = ["wasm"] }
+dprint-core      = { version = "0.70.0", features = ["wasm"] }
 json-schema-sort = { version = "0.1", default-features = false, optional = true }
 schemars         = { version = "1", optional = true }
 serde            = { version = "1", features = ["derive"] }
 serde_json       = "1"
-shuck-formatter  = "=0.2.2"
+shuck-formatter  = "=0.2.3"
 
 [features]
 schema = ["dep:json-schema-sort", "dep:schemars"]
