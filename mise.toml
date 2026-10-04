@@ -1,0 +1,11 @@
+[tools]
+dprint = "0.57.5-kjanat"
+
+[tool_alias]
+dprint = "github:kjanat/dprint"
+
+[shell_alias]
+kprint = "dprint"
+
+[settings]
+minimum_release_age = "0s"
