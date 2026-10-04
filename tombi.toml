@@ -109,3 +109,8 @@ include = ["**/helix/config.toml", "**/.helix/config.toml"]
 [[schemas]]
 path    = "https://gist.githubusercontent.com/kjanat/8b6206f3780eedbaa422fbc9b2ec5ceb/raw/6416240a9d34ebfa96db922fb7aebd9628262bea/helix-theme.schema.json"
 include = ["**/helix/themes/*.toml", "**/runtime/themes/*.toml"]
+
+# Mise
+[[schemas]]
+path    = "https://mise.jdx.dev/schema/mise.json"
+include = ["mise.toml", ".mise.toml"]

@@ -1,0 +1,22 @@
+#:schema https://kjanat.github.io/runner/schemas/runner.toml.schema.json
+
+[chain]
+on_fail = "wait"
+
+[install]
+tools  = true
+frozen = false
+
+[output]
+warnings = true
+errors   = true
+summary  = true
+progress = true
+groups   = true
+timing   = true
+
+[tasks.e2e]
+source = "mise"
+
+[tasks.wasm]
+source = "mise"

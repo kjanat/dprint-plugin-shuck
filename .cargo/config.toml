@@ -1,8 +1,10 @@
 [alias]
-lint      = "clippy --workspace --all-targets --all-features"
-lint-wasm = "clippy --lib --target wasm32-unknown-unknown --all-features"
-schema    = "run --features schema --bin generate-schema"
-wasm      = "rustc --lib --crate-type cdylib --profile wasm-release --target wasm32-unknown-unknown"
+fmt-check   = "fmt --all --check"
+lint        = "clippy --workspace --all-targets --all-features"
+lint-wasm   = "clippy --lib --target wasm32-unknown-unknown --all-features"
+schema      = "run --features schema --bin generate-schema"
+test-locked = "test --locked"
+wasm        = "rustc --lib --crate-type cdylib --profile wasm-release --target wasm32-unknown-unknown"
 
 [target.wasm32-unknown-unknown]
 rustflags = ["-Clink-args=-z stack-size=10485760"]

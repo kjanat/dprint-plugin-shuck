@@ -1,11 +1,76 @@
+#:schema https://mise.jdx.dev/schema/mise.json
+#:tombi toml-version = "v1.1.0"
+
 [tools]
-dprint = "0.57.5-kjanat"
+actionlint = "master"
+deno       = "latest"
+kprint     = { version = "0.57.5-kjanat", version_prefix = "", rename_exe = "kprint" }
+runner-run = { version = "0.27.1", filter_bins = ["run", "runner"] }
+tombi      = "1.7.2"
+binaryen   = { version = "116", version_prefix = "version_", filter_bins = ["wasm-opt"] }
 
 [tool_alias]
-dprint = "github:kjanat/dprint"
+actionlint = "go:actionlint.kjanat.dev/cmd/actionlint"
+deno       = "github:denoland/deno"
+kprint     = "github:kjanat/dprint"
+runner-run = "github:kjanat/runner"
+tombi      = "github:tombi-toml/tombi"
+binaryen   = "github:WebAssembly/binaryen"
 
-[shell_alias]
-kprint = "dprint"
+[vars]
+target  = "wasm32-unknown-unknown"
+profile = "wasm-release"
+wasm    = "dprint_plugin_shuck.wasm"
 
 [settings]
 minimum_release_age = "0s"
+experimental        = true
+prereleases         = true
+
+[deps.deno]
+auto = true
+
+[tasks."build-wasm"]
+run     = "cargo wasm"
+outputs = ["target/{{vars.target}}/{{vars.profile}}/{{vars.wasm}}"]
+
+[tasks."wasm"]
+description  = "Build the optimized {{vars.out}}"
+alias        = "b"
+depends      = ["build-wasm"]
+depends_post = ["schema:gen"]
+vars         = {
+  optflags = "-Oz --enable-bulk-memory --enable-sign-ext --enable-nontrapping-float-to-int",
+  in       = "target/{{vars.target}}/{{vars.profile}}/{{vars.wasm}}",
+  out      = "plugin.wasm",
+}
+run          = '''
+wasm-opt {{vars.optflags}} target/{{vars.target}}/{{vars.profile}}/{{vars.wasm}} -o {{vars.out}}
+'''
+outputs      = ["{{vars.out}}"]
+
+[tasks.verify-release]
+file = "scripts/verify-release.ts"
+
+[tasks.release-notes]
+file = "scripts/release-notes.ts"
+
+[tasks.scripts]
+run = [
+  "deno check --frozen scripts/*.ts",
+  "deno lint scripts/",
+]
+
+[tasks."schema:gen"]
+alias = "cargo-schema"
+run   = "run schema"
+
+[tasks."schema:diff"]
+depends = "schema:gen"
+run     = "git diff --exit-code -- schema.json"
+
+[tasks.e2e]
+depends  = ["build-wasm"]
+vars     = { wasm = "target/{{vars.target}}/{{vars.profile}}/{{vars.wasm}}" }
+run      = "run --source deno e2e"
+raw_args = true

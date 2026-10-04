@@ -1,3 +1,4 @@
+#!/usr/bin/env -S deno run --frozen -RW
 import { createFromBuffer } from '@dprint/formatter';
 import { assert, assertEquals } from '@std/assert';
 import { parse } from '@std/toml';

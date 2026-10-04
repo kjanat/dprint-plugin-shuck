@@ -8,6 +8,7 @@
 {
 	"formatter": [{ "external": { "command": "dprint", "arguments": ["fmt", "--stdin", "{buffer_path}"] } }],
 	"prettier": { "allowed": false },
+	"languages": { "TypeScript": { "language_servers": ["deno"] } },
 	"lsp": {
 		"rust-analyzer": {
 			"initialization_options": {

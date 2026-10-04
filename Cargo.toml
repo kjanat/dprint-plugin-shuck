@@ -19,7 +19,7 @@ name              = "generate-schema"
 required-features = ["schema"]
 
 [dependencies]
-anyhow           = "1"
+anyhow           = { version = "1", optional = true }
 dprint-core      = { version = "0.70.0", features = ["wasm"] }
 json-schema-sort = { version = "0.1", default-features = false, optional = true }
 schemars         = { version = "1", optional = true }
@@ -28,7 +28,7 @@ serde_json       = "1"
 shuck-formatter  = "=0.2.3"
 
 [features]
-schema = ["dep:json-schema-sort", "dep:schemars"]
+schema = ["dep:anyhow", "dep:json-schema-sort", "dep:schemars"]
 
 [lints.clippy]
 all                     = { level = "deny", priority = -1 }

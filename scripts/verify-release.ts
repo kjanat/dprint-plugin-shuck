@@ -1,3 +1,4 @@
+#!/usr/bin/env -S deno run --frozen -R
 import { assert, assertEquals, assertMatch } from '@std/assert';
 import { parse } from '@std/toml';
 

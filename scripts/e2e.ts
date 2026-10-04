@@ -2,7 +2,10 @@ import { createFromBuffer } from '@dprint/formatter';
 import { assert, assertEquals, assertThrows } from '@std/assert';
 
 const root = new URL('../', import.meta.url);
-const wasmUrl = new URL(Deno.args[0] ?? 'target/wasm32-unknown-unknown/wasm-release/dprint_plugin_shuck.wasm', root);
+const wasmUrl = new URL(
+	Deno.env.get('WASM_PATH') || Deno.args[0] || 'target/wasm32-unknown-unknown/wasm-release/dprint_plugin_shuck.wasm',
+	root,
+);
 const wasm = await Deno.readFile(wasmUrl);
 const source = await Deno.readTextFile(new URL('tests/fixtures/input.bash', root));
 const expected = await Deno.readTextFile(new URL('tests/fixtures/expected.bash', root));
