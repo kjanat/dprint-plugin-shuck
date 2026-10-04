@@ -5,7 +5,7 @@
 		"@std/toml": "jsr:@std/toml@1"
 	},
 	"tasks": {
-		"e2e": "deno test --frozen --allow-read --allow-write --allow-run=dprint --allow-net=127.0.0.1 scripts/e2e.ts --",
+		"e2e": "deno test --frozen -RW --allow-env=WASM_PATH --allow-run=dprint --allow-net=127.0.0.1 scripts/e2e.ts --",
 		"check": "deno check --frozen scripts/*.ts",
 		"lint": "deno lint scripts/",
 		"scripts": "run -s deno:check deno:lint"
