@@ -3,19 +3,20 @@
 ## Development
 
 Install Rust through rustup and mise, then run `mise install` for the development
-tools. The repository's
-[rust-toolchain.toml](rust-toolchain.toml) selects the Rust toolchain and Wasm
+tools. The repository's [rust-toolchain.toml] selects the Rust toolchain and Wasm
 target.
 
+[rust-toolchain.toml]: rust-toolchain.toml
+
 ```sh
-cargo test --locked
-cargo fmt --all --check
-cargo lint
-cargo lint-wasm
-cargo schema
-mise run wasm
-mise run e2e
-deno task test-cli
+run test-locked
+run fmt-check
+run cargo:lint
+run lint-wasm
+run schema
+run wasm
+run e2e
+run test-cli
 ```
 
 `cargo wasm` selects the Wasm target and release profile through its Cargo alias.
@@ -34,7 +35,7 @@ The helper provides `--help`, `--json`, and `--quiet`. Pass additional Cargo
 options after `--`:
 
 ```sh
-./scripts/build-wasm.ts target/artifacts/plugin.wasm -- --offline
+run scripts/build-wasm.ts target/artifacts/plugin.wasm -- --offline
 ```
 
 To use a local build, add `./plugin.wasm` to your dprint configuration's `plugins`
@@ -63,8 +64,17 @@ Shuck version, supported extensions, and artifact size. GitHub adds the changelo
 To preview the notes, place `plugin.wasm` and `schema.json` in a directory and run:
 
 ```sh
-deno task release-notes path/to/directory
+run release-notes path/to/directory
 ```
 
 This writes `release-notes.md` into that directory. Changes to published artifacts
 require a new release version.
+
+Both release helpers provide `--help`, `--json`, and `--quiet`. Their artifact
+directory defaults to `artifact` and can be set through `ARTIFACT_DIR`; an
+explicit directory takes precedence. To check a tag and schema before release:
+
+```sh
+run verify-release 0.1.2 path/to/directory
+run release-notes path/to/directory
+```
