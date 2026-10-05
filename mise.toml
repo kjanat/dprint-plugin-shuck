@@ -49,25 +49,21 @@ file = "scripts/verify-release.ts"
 file = "scripts/release-notes.ts"
 
 [tasks.scripts]
-run = [
-  "deno check --frozen scripts/*.ts",
-  "deno lint scripts/",
-  "deno task test-cli",
-]
+run = "run scripts"
 
 [tasks."schema:gen"]
 alias = "cargo-schema"
 run   = "cargo schema"
 
 [tasks."schema:diff"]
-depends = "schema:gen"
+depends = ["schema:gen"]
 run     = "git diff --exit-code -- schema.json"
 
 [tasks.e2e]
-depends       = ["wasm"]
-env.WASM_PATH = "{{vars.wasm_output}}"
-run           = "deno task e2e"
-raw_args      = true
+depends           = ["wasm"]
+env.WASM_PATH     = "{{ env?.WASM_PATH or vars.wasm_output }}"
+env.RUNNER_SOURCE = "deno"
+run               = "run e2e"
 
 [task_templates."wasm-opt"]
 depends = ["build-wasm"]

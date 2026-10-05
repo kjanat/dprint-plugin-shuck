@@ -1,14 +1,20 @@
 import { createFromBuffer } from '@dprint/formatter';
+import { flag, readFlags } from '@kjanat/dreamcli';
 import { assert, assertEquals, assertThrows } from '@std/assert';
+import { fromFileUrl, resolve, toFileUrl } from '@std/path';
 
 const root = new URL('../', import.meta.url);
-const wasmUrl = new URL(
-	Deno.env.get('WASM_PATH') || Deno.args[0] || 'plugin.wasm',
-	root,
-);
-const wasm = await Deno.readFile(wasmUrl);
-const source = await Deno.readTextFile(new URL('tests/fixtures/input.bash', root));
-const expected = await Deno.readTextFile(new URL('tests/fixtures/expected.bash', root));
+const { wasmPath } = await readFlags({
+	wasmPath: flag.path().env('WASM_PATH').default('plugin.wasm').describe(
+		'Wasm plugin path, relative to the repository root.',
+	),
+});
+const wasmUrl = toFileUrl(resolve(fromFileUrl(root), wasmPath));
+const [wasm, source, expected] = await Promise.all([
+	Deno.readFile(wasmUrl),
+	Deno.readTextFile(new URL('tests/fixtures/input.bash', root)),
+	Deno.readTextFile(new URL('tests/fixtures/expected.bash', root)),
+]);
 
 Deno.test('Wasm formatter: fixture, idempotence, globals, and overrides', () => {
 	const formatter = createFromBuffer(wasm);

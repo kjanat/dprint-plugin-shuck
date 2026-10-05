@@ -7,9 +7,9 @@
 		"@std/toml": "jsr:@std/toml@^1"
 	},
 	"tasks": {
-		"e2e": "deno test --frozen -RW --allow-env=WASM_PATH --allow-run=dprint --allow-net=127.0.0.1 scripts/e2e.ts --",
-		"check": "deno check --frozen scripts/*.ts",
-		"lint": "deno lint scripts/",
+		"e2e": "deno test --frozen -RWE --allow-run=dprint --allow-net=127.0.0.1 tests/e2e.ts --",
+		"check": "deno check --frozen scripts/*.ts tests/*.ts",
+		"lint": "deno lint scripts/ tests/",
 		"test-cli": "deno test --frozen -RWE --allow-run=cargo scripts/build-wasm_test.ts",
 		"scripts": "run -s deno:check deno:lint deno:test-cli"
 	}

@@ -47,8 +47,9 @@ that the generated schema matches the checked-in file.
 The Deno tests load the Wasm through `@dprint/formatter` and exercise the dprint
 CLI. They cover formatting, idempotence, configuration, errors, file matching,
 per-file overrides, checksum installation, and config updates. To test a
-downloaded artifact, run `deno task e2e artifact/plugin.wasm`; paths are relative
-to the repository root.
+downloaded artifact, run `deno task e2e --wasm-path artifact/plugin.wasm`; paths
+are relative to the repository root. `--wasm-path` takes precedence over
+`WASM_PATH`, which takes precedence over the default `plugin.wasm`.
 
 ## Releases
 
