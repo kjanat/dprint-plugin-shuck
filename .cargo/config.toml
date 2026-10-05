@@ -1,10 +1,29 @@
+#:schema https://www.schemastore.org/cargo-config.json
+
 [alias]
 fmt-check   = "fmt --all --check"
 lint        = "clippy --workspace --all-targets --all-features"
 lint-wasm   = "clippy --lib --target wasm32-unknown-unknown --all-features"
-schema      = "run --features schema --bin generate-schema"
+schema      = "run --target host-tuple --features schema --bin generate-schema"
 test-locked = "test --locked"
-wasm        = "rustc --lib --crate-type cdylib --profile wasm-release --target wasm32-unknown-unknown"
+wasm        = "rustc --lib --crate-type cdylib --profile wasm-release --target wasm32-unknown-unknown --locked"
+wasm-json   = "wasm --message-format=json,json-render-diagnostics"
 
-[target.wasm32-unknown-unknown]
-rustflags = ["-Clink-args=-z stack-size=10485760"]
+[build]
+jobs = 8
+
+[profile.wasm-release]
+rustflags  = ["-Clink-args=-z stack-size=10485760"]
+trim-paths = "all"
+
+[target.'cfg(not(target_family = "wasm"))']
+rustflags = ["-C", "target-cpu=native"]
+
+# [target.wasm32-unknown-unknown]
+# rustflags = ["-Clink-args=-z stack-size=10485760"]
+
+[unstable]
+profile-rustflags = true
+trim-paths        = true
+# sbom            = true
+# script          = true

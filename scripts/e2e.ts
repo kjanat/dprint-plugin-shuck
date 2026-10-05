@@ -3,7 +3,7 @@ import { assert, assertEquals, assertThrows } from '@std/assert';
 
 const root = new URL('../', import.meta.url);
 const wasmUrl = new URL(
-	Deno.env.get('WASM_PATH') || Deno.args[0] || 'target/wasm32-unknown-unknown/wasm-release/dprint_plugin_shuck.wasm',
+	Deno.env.get('WASM_PATH') || Deno.args[0] || 'plugin.wasm',
 	root,
 );
 const wasm = await Deno.readFile(wasmUrl);

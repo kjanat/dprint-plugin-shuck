@@ -2,7 +2,8 @@
 
 ## Development
 
-Install Rust through rustup, Deno, and dprint. The repository's
+Install Rust through rustup and mise, then run `mise install` for the development
+tools. The repository's
 [rust-toolchain.toml](rust-toolchain.toml) selects the Rust toolchain and Wasm
 target.
 
@@ -12,19 +13,35 @@ cargo fmt --all --check
 cargo lint
 cargo lint-wasm
 cargo schema
-deno task wasm
-deno task e2e plugin.wasm
+mise run wasm
+mise run e2e
+deno task test-cli
 ```
 
-`deno task wasm` builds with fat LTO and runs Binaryen's `wasm-opt -Oz`, producing
-`plugin.wasm` in the repository root. Binaryen runs through Deno at the pinned
-version; no separate native installation is required. `cargo wasm` produces the
-compiler output without running Binaryen.
+`cargo wasm` selects the Wasm target and release profile through its Cargo alias.
+The Cargo configuration also enables path trimming for that profile.
+`mise run build-wasm` invokes the `wasm-json` alias and stages the compiler-reported
+artifact at `target/artifacts/plugin.wasm`. `mise run wasm` then runs Binaryen's
+`wasm-opt -O3`, producing `plugin.wasm` in the repository root and regenerating
+the schema. `mise run e2e` builds and tests that optimized plugin. `cargo wasm`
+remains available to build the compiler output without staging or optimizing it.
+
+The Wasm alias selects only the `cdylib` output to preserve fat LTO. Cargo's
+`rustc` command does not copy artifacts to `build.artifact-dir`, so the staging
+helper copies the path reported by Cargo instead.
+
+The helper provides `--help`, `--json`, and `--quiet`. Pass additional Cargo
+options after `--`:
+
+```sh
+./scripts/build-wasm.ts target/artifacts/plugin.wasm -- --offline
+```
 
 To use a local build, add `./plugin.wasm` to your dprint configuration's `plugins`
 array in place of the published plugin URL.
 
-`cargo schema` regenerates `schema.json` from the configuration type. CI checks
+`mise run schema:gen` regenerates `schema.json` from the configuration type using
+the host target. CI checks
 that the generated schema matches the checked-in file.
 
 The Deno tests load the Wasm through `@dprint/formatter` and exercise the dprint

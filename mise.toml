@@ -5,23 +5,23 @@
 actionlint = "master"
 deno       = "latest"
 kprint     = { version = "0.57.5-kjanat", version_prefix = "", rename_exe = "kprint" }
-dprint     = "latest"
+dprint     = { version = "latest", version_prefix = "" }
 runner-run = { version = "0.27.1", filter_bins = ["run", "runner"] }
 tombi      = "1.7.2"
 binaryen   = { version = "133", version_prefix = "version_", filter_bins = ["wasm-opt"] }
 
 [tool_alias]
 actionlint = "go:actionlint.kjanat.dev/cmd/actionlint"
+binaryen   = "github:WebAssembly/binaryen"
 deno       = "github:denoland/deno"
+dprint     = "github:dprint/dprint"
 kprint     = "github:kjanat/dprint"
 runner-run = "github:kjanat/runner"
 tombi      = "github:tombi-toml/tombi"
-binaryen   = "github:WebAssembly/binaryen"
 
 [vars]
-target  = "wasm32-unknown-unknown"
-profile = "wasm-release"
-wasm    = "dprint_plugin_shuck.wasm"
+wasm_input  = "target/artifacts/plugin.wasm"
+wasm_output = "plugin.wasm"
 
 [settings]
 minimum_release_age = "0s"
@@ -32,23 +32,15 @@ prereleases         = true
 auto = true
 
 [tasks."build-wasm"]
-run     = "cargo wasm"
-outputs = ["target/{{vars.target}}/{{vars.profile}}/{{vars.wasm}}"]
+description = "Build and stage the compiler's Wasm output"
+run         = "deno run --frozen -RWE --allow-run=cargo scripts/build-wasm.ts {{vars.wasm_input | quote}}"
+outputs     = ["{{vars.wasm_input}}"]
 
 [tasks."wasm"]
-description  = "Build the optimized {{vars.out}}"
+description  = "Build the optimized {{vars.wasm_output}}"
+extends      = "wasm-opt"
 alias        = "b"
-depends      = ["build-wasm"]
 depends_post = ["schema:gen"]
-vars         = {
-  optflags = "--enable-bulk-memory-opt -O3",
-  in       = "target/{{vars.target}}/{{vars.profile}}/{{vars.wasm}}",
-  out      = "plugin.wasm",
-}
-run          = '''
-wasm-opt {{vars.optflags}} target/{{vars.target}}/{{vars.profile}}/{{vars.wasm}} -o {{vars.out}}
-'''
-outputs      = ["{{vars.out}}"]
 
 [tasks.verify-release]
 file = "scripts/verify-release.ts"
@@ -60,18 +52,26 @@ file = "scripts/release-notes.ts"
 run = [
   "deno check --frozen scripts/*.ts",
   "deno lint scripts/",
+  "deno task test-cli",
 ]
 
 [tasks."schema:gen"]
 alias = "cargo-schema"
-run   = "run schema"
+run   = "cargo schema"
 
 [tasks."schema:diff"]
 depends = "schema:gen"
 run     = "git diff --exit-code -- schema.json"
 
 [tasks.e2e]
-depends  = ["build-wasm"]
-vars     = { wasm = "target/{{vars.target}}/{{vars.profile}}/{{vars.wasm}}" }
-run      = "run --source deno e2e"
-raw_args = true
+depends       = ["wasm"]
+env.WASM_PATH = "{{vars.wasm_output}}"
+run           = "deno task e2e"
+raw_args      = true
+
+[task_templates."wasm-opt"]
+depends = ["build-wasm"]
+vars    = { wasm_opt_flags = "--enable-bulk-memory-opt -O3" }
+sources = ["{{vars.wasm_input}}", "mise.toml"]
+outputs = ["{{vars.wasm_output}}"]
+run     = "wasm-opt {{vars.wasm_opt_flags}} {{vars.wasm_input | quote}} -o {{vars.wasm_output | quote}}"
