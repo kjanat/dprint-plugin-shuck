@@ -20,7 +20,7 @@ required-features = ["schema"]
 
 [dependencies]
 anyhow           = { version = "1", optional = true }
-dprint-core      = { version = "0.70.0", features = ["wasm"] }
+dprint-core      = { version = "0.71.0", features = ["wasm"] }
 json-schema-sort = { version = "0.1", default-features = false, optional = true }
 schemars         = { version = "1", optional = true }
 serde            = { version = "1", features = ["derive"] }
