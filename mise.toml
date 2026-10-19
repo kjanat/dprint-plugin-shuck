@@ -13,10 +13,9 @@ binaryen   = { version = "133", version_prefix = "version_", filter_bins = ["was
 prerelease          = true
 version             = "latest"
 minimum_release_age = "0s"
-rename_exe = "kprint"
+rename_exe.         = "kprint"
 postinstall         = "kprint"
 depends             = ["tombi", "go"]
-tag_regex           = '^\d+\.\d+\.\d+.kjanat$'
 
 [tool_alias]
 actionlint = "go:actionlint.kjanat.dev/cmd/actionlint"
