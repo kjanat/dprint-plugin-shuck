@@ -6,17 +6,16 @@ actionlint = "master"
 deno       = "latest"
 dprint     = { version = "latest", version_prefix = "" }
 runner-run = { version = "0.27.1", filter_bins = ["run", "runner"] }
-tombi      = "1.7.2"
+tombi      = "1.8.9"
 binaryen   = { version = "133", version_prefix = "version_", filter_bins = ["wasm-opt"] }
 
 [tools.kprint]
 prerelease          = true
 version             = "latest"
 minimum_release_age = "0s"
-rename_exe = "kprint"
+rename_exe          = "kprint"
 postinstall         = "kprint"
 depends             = ["tombi", "go"]
-tag_regex           = '^\d+\.\d+\.\d+.kjanat$'
 
 [tool_alias]
 actionlint = "go:actionlint.kjanat.dev/cmd/actionlint"
