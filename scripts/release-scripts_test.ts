@@ -1,9 +1,10 @@
+import { CLIError } from '@kjanat/dreamcli';
 import { createDenoAdapter } from '@kjanat/dreamcli/runtime';
 import { runCommand } from '@kjanat/dreamcli/testkit';
-import { assert, assertEquals, assertStringIncludes } from '@std/assert';
+import { assert, assertEquals, assertStringIncludes, assertThrows } from '@std/assert';
 import { join } from '@std/path';
 import { parse } from '@std/toml';
-import { releaseNotes } from './release-notes.ts';
+import { previousLockfile, releaseNotes, releaseTitle, shuckVersion, upstreamSection } from './release-notes.ts';
 import { verifyRelease } from './verify-release.ts';
 
 const { stat } = createDenoAdapter();
@@ -103,4 +104,31 @@ Deno.test('release-notes: invalid Wasm preserves existing notes and returns a JS
 		assertEquals(result.stderr, []);
 		assertEquals(await Deno.readTextFile(notesPath), 'previous release notes');
 	});
+});
+
+Deno.test('release-notes: Shuck section appears only when the bundled version changed', () => {
+	assertEquals(upstreamSection(undefined, '0.2.7'), '');
+	assertEquals(upstreamSection('0.2.7', '0.2.7'), '');
+	const section = upstreamSection('0.2.3', '0.2.7');
+	assertStringIncludes(section, '## Shuck 0.2.3 to 0.2.7');
+	assertStringIncludes(section, 'https://github.com/ewhauser/shuck/compare/v0.2.3...v0.2.7');
+	assertStringIncludes(section, 'https://github.com/ewhauser/shuck/releases/tag/v0.2.7');
+	assertEquals(releaseTitle('0.1.3', '0.2.7'), '0.1.3 - Shuck 0.2.7');
+});
+
+Deno.test('release-notes: Shuck version comes from the single resolved formatter package', () => {
+	const lock = (versions: string[]) =>
+		versions.map((version) => `[[package]]\nname = "shuck-formatter"\nversion = "${version}"\n`).join('\n');
+	assertEquals(shuckVersion(lock(['0.2.7'])), '0.2.7');
+	for (const versions of [[], ['0.2.5', '0.2.7']]) {
+		const error = assertThrows(() => shuckVersion(lock(versions)), CLIError);
+		assertEquals(error.code, 'INVALID_LOCKFILE');
+	}
+});
+
+Deno.test('release-notes: previous lockfile comes from the nearest earlier release tag', async () => {
+	const lock = await previousLockfile(version);
+	assert(lock !== undefined);
+	const previous = shuckVersion(lock);
+	assert(/^\d+\.\d+\.\d+$/.test(previous), previous);
 });

@@ -57,9 +57,14 @@ are relative to the repository root. `--wasm-path` takes precedence over
 Release tags use the plugin's Cargo version without a `v` prefix. The release
 workflow is configured to run CI and publish `plugin.wasm` and `schema.json`.
 
-Release notes are generated from the built plugin, schema, and `Cargo.lock`.
-They include installation instructions, a versioned plugin URL, the bundled
-Shuck version, supported extensions, and artifact size. GitHub adds the changelog.
+Release notes are generated from the built plugin, schema, `Cargo.lock`, and
+the previous release tag. They include installation instructions, a versioned
+plugin URL, the bundled Shuck version, the Shuck upgrade since the previous
+release, supported extensions, and artifact size. The release title is written
+to `release-title.txt`. GitHub adds the changelog, grouped by the labels in
+[.github/release.yml].
+
+[.github/release.yml]: .github/release.yml
 
 To preview the notes, place `plugin.wasm` and `schema.json` in a directory and run:
 
@@ -67,7 +72,7 @@ To preview the notes, place `plugin.wasm` and `schema.json` in a directory and r
 run release-notes path/to/directory
 ```
 
-This writes `release-notes.md` into that directory. Changes to published artifacts
+This writes `release-notes.md` and `release-title.txt` into that directory. Changes to published artifacts
 require a new release version.
 
 Both release helpers provide `--help`, `--json`, and `--quiet`. Their artifact

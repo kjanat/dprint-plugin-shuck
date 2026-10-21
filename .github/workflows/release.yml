@@ -16,6 +16,7 @@ jobs:
     env: { ref: "${{ github.ref_name }}", download_dir: artifact }
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with: { fetch-depth: 0 }
       - parallel:
           - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
             with: { name: plugin, path: "${{ env.download_dir }}" }
@@ -25,6 +26,7 @@ jobs:
       - name: "Publish release ${{ env.ref }}"
         env: { GH_TOKEN: "${{ github.token }}" }
         working-directory: ${{ env.download_dir }}
-        run: gh release create "${ref}" --verify-tag --title "${ref}"
+        run: gh release create "${ref}" --verify-tag
+          --title "$(cat release-title.txt)"
           --generate-notes --notes-file release-notes.md
           plugin.wasm schema.json
