@@ -12,6 +12,7 @@ fn format(bytes: &[u8], path: &str, config: &Configuration) -> FormatResult {
             range: None,
             config_id: dprint_core::plugins::FormatConfigId::uninitialized(),
             token: &dprint_core::plugins::NullCancellationToken,
+            arena_pool: &dprint_core::formatting::ArenaPool::new(),
         },
         |_| panic!("Host formatting is unnecessary"),
     )
@@ -146,6 +147,7 @@ fn range_formatting_leaves_the_document_untouched() {
                 config: &config,
                 range: Some(0..3),
                 token: &dprint_core::plugins::NullCancellationToken,
+                arena_pool: &dprint_core::formatting::ArenaPool::new(),
             },
             |_| panic!("Host formatting is unnecessary"),
         )
