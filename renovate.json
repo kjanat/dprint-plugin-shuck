@@ -9,7 +9,7 @@
 	"minimumReleaseAge": "3 days",
 	"automerge": true,
 	"automergeType": "pr",
-	"platformAutomerge": false,
+	"automergeStrategy": "squash",
 	"github-actions": {
 		"enabled": false
 	},
