@@ -1,5 +1,7 @@
 changelog:
   categories:
+    - title: Shuck
+      labels: [shuck]
     - title: Features
       labels: [enhancement]
     - title: Fixes
