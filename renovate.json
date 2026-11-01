@@ -2,5 +2,42 @@
 	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
 	"extends": [
 		"config:recommended"
+	],
+	"labels": [
+		"dependencies"
+	],
+	"minimumReleaseAge": "3 days",
+	"automerge": true,
+	"automergeType": "pr",
+	"automergeStrategy": "squash",
+	"github-actions": {
+		"enabled": false
+	},
+	"packageRules": [
+		{
+			"matchFileNames": [
+				"rust-toolchain.toml"
+			],
+			"labels": [
+				"toolchain"
+			]
+		},
+		{
+			"matchUpdateTypes": [
+				"major"
+			],
+			"automerge": false
+		},
+		{
+			"matchPackageNames": [
+				"/^shuck-/"
+			],
+			"groupName": "Shuck",
+			"labels": [
+				"dependencies",
+				"shuck"
+			],
+			"automerge": false
+		}
 	]
 }
