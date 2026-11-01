@@ -57,6 +57,13 @@ are relative to the repository root. `--wasm-path` takes precedence over
 Release tags use the plugin's Cargo version without a `v` prefix. The release
 workflow is configured to run CI and publish `plugin.wasm` and `schema.json`.
 
+A push to `master` that changes the bundled Shuck version starts the auto-release
+workflow. It bumps the patch version, regenerates `schema.json`, and runs CI on
+the bump commit in a `release/<version>` branch. When CI passes, it fast-forwards
+`master`, tags the release, and dispatches the release workflow for that tag.
+A package version without a tag is released as is. `scripts/release-bump.ts`
+prints the plan and writes the bumped version to `Cargo.toml`.
+
 Release notes are generated from the built plugin, schema, `Cargo.lock`, and
 the previous release tag. They include installation instructions, a versioned
 plugin URL, the bundled Shuck version, the Shuck upgrade since the previous

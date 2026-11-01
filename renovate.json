@@ -37,7 +37,7 @@
 				"dependencies",
 				"shuck"
 			],
-			"automerge": false
+			"automerge": true
 		}
 	]
 }

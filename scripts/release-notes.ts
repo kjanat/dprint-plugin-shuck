@@ -35,19 +35,22 @@ export function upstreamSection(previous: string | undefined, current: string): 
 Formatting changes in this release come from Shuck. See the [upstream changes](${shuckRepo}/compare/v${previous}...v${current}) and the [Shuck ${current} release](${shuckRepo}/releases/tag/v${current}).`;
 }
 
-async function git(...args: string[]): Promise<string | undefined> {
+export async function git(...args: string[]): Promise<string | undefined> {
 	const { success, stdout } = await new Deno.Command('git', { args, stdout: 'piped', stderr: 'null' }).output();
 	return success ? new TextDecoder().decode(stdout).trim() : undefined;
 }
 
-export async function previousLockfile(version: string): Promise<string | undefined> {
-	const tag = await git('describe', '--tags', '--abbrev=0', '--exclude', version);
-	if (tag === undefined) return undefined;
+export async function lockfileAt(tag: string): Promise<string> {
 	const lock = await git('show', `${tag}:Cargo.lock`);
 	if (lock === undefined) {
 		throw new CLIError(`Tag ${tag} has no Cargo.lock.`, { code: 'INVALID_PREVIOUS_RELEASE' });
 	}
 	return lock;
+}
+
+export async function previousLockfile(version: string): Promise<string | undefined> {
+	const tag = await git('describe', '--tags', '--abbrev=0', '--exclude', version);
+	return tag === undefined ? undefined : await lockfileAt(tag);
 }
 
 export const releaseNotes = command('release-notes')
