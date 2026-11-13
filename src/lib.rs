@@ -27,6 +27,7 @@ impl SyncPluginHandler<Configuration> for PluginHandler {
             name: env!("CARGO_PKG_NAME").into(),
             version: env!("CARGO_PKG_VERSION").into(),
             config_key: "shuck".into(),
+            supports_range_formatting: Some(false),
             help_url: env!("CARGO_PKG_REPOSITORY").into(),
             config_schema_url: format!("{}/{}/schema.json", proxy_url(), env!("CARGO_PKG_VERSION")),
             update_url: Some(format!("{}/latest.json", proxy_url())),
