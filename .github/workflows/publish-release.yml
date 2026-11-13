@@ -1,0 +1,69 @@
+name: Publish release
+run-name: ${{ inputs.beepboop_title || github.workflow }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      beepboop_execution_id: { type: string, required: true }
+      beepboop_title: { type: string, required: false }
+
+permissions: { contents: read, id-token: write }
+
+concurrency: { group: "publish-${{ inputs.beepboop_execution_id }}", cancel-in-progress: false }
+
+jobs:
+  begin:
+    runs-on: ubuntu-26.04
+    outputs:
+      source-sha: ${{ fromJSON(steps.release.outputs.context).sourceSha }}
+      version: ${{ fromJSON(steps.release.outputs.context).version }}
+    steps:
+      - uses: kjanat/beepboop/actions/begin@e7d916f27126cc7e47af904e8888cfb9b180c8e4 # v1
+        id: release
+        with: { execution-id: "${{ inputs.beepboop_execution_id }}", stream: main, operation: promote }
+
+  validate:
+    needs: begin
+    uses: $/.github/workflows/ci.yml
+    with: { ref: "${{ needs.begin.outputs.source-sha }}" }
+
+  publish:
+    needs: [begin, validate]
+    runs-on: ubuntu-26.04
+    env: { TAG: "${{ needs.begin.outputs.version }}", download_dir: artifact }
+    steps:
+      - uses: kjanat/beepboop/actions/begin@e7d916f27126cc7e47af904e8888cfb9b180c8e4 # v1
+        id: release
+        with: { execution-id: "${{ inputs.beepboop_execution_id }}", stream: main, operation: promote }
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with: { ref: "${{ needs.begin.outputs.source-sha }}", fetch-depth: 0, persist-credentials: false }
+      - parallel:
+          - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+            with: { name: plugin, path: "${{ env.download_dir }}" }
+          - uses: jdx/mise-action@6612f0ef07ed2a736cd1e00a94a065522dd41195 # v5.2.5
+      - run: run verify-release "${TAG}"
+      - run: run release-notes
+      - uses: kjanat/beepboop/actions/token@e7d916f27126cc7e47af904e8888cfb9b180c8e4 # v1
+        id: beepboop
+        with: { execution-id: "${{ inputs.beepboop_execution_id }}", permission-contents: write }
+      - name: Upload the tested plugin to the draft release
+        env: { GH_TOKEN: "${{ steps.beepboop.outputs.token }}" }
+        run: gh release upload "${TAG}" artifact/plugin.wasm artifact/schema.json --clobber
+      - uses: kjanat/beepboop/actions/publish-refs@e7d916f27126cc7e47af904e8888cfb9b180c8e4 # v1
+        env:
+          GIT_AUTHOR_NAME: ${{ steps.beepboop.outputs.bot-login }}
+          GIT_AUTHOR_EMAIL: ${{ steps.beepboop.outputs.bot-email }}
+          GIT_COMMITTER_NAME: ${{ steps.beepboop.outputs.bot-login }}
+          GIT_COMMITTER_EMAIL: ${{ steps.beepboop.outputs.bot-email }}
+        with: { token: "${{ steps.beepboop.outputs.token }}" }
+      - uses: kjanat/beepboop/actions/publish-release@e7d916f27126cc7e47af904e8888cfb9b180c8e4 # v1
+        with: { execution-id: "${{ inputs.beepboop_execution_id }}" }
+      - name: Include installation instructions and the Shuck changelog
+        env: { GH_TOKEN: "${{ steps.beepboop.outputs.token }}" }
+        run: |
+          printf '\n' >> artifact/release-notes.md
+          gh release view "${TAG}" --json body --jq .body >> artifact/release-notes.md
+          gh release edit "${TAG}" --title "$(cat artifact/release-title.txt)" --notes-file artifact/release-notes.md
+      - uses: kjanat/beepboop/actions/report@e7d916f27126cc7e47af904e8888cfb9b180c8e4 # v1
+        if: always() && steps.release.outcome == 'success'
+        with: { execution-id: "${{ inputs.beepboop_execution_id }}" }

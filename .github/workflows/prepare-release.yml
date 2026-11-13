@@ -1,0 +1,31 @@
+name: Prepare release
+run-name: ${{ inputs.beepboop_title || github.workflow }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      beepboop_execution_id: { type: string, required: true }
+      beepboop_title: { type: string, required: false }
+
+permissions: { contents: read, id-token: write }
+
+concurrency: { group: "prepare-${{ inputs.beepboop_execution_id }}", cancel-in-progress: false }
+
+jobs:
+  prepare:
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: kjanat/beepboop/actions/begin@e7d916f27126cc7e47af904e8888cfb9b180c8e4 # v1
+        id: release
+        with: { execution-id: "${{ inputs.beepboop_execution_id }}", stream: main, operation: prepare }
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with: { ref: "${{ fromJSON(steps.release.outputs.context).sourceSha }}", fetch-depth: 0, persist-credentials: false }
+      - uses: jdx/mise-action@6612f0ef07ed2a736cd1e00a94a065522dd41195 # v5.2.5
+      - uses: kjanat/beepboop/actions/prepare@e7d916f27126cc7e47af904e8888cfb9b180c8e4 # v1
+        with: { mode: apply, context: "${{ steps.release.outputs.context }}" }
+      - name: Regenerate the lockfile and versioned schema
+        run: |
+          cargo check --all-targets --all-features
+          mise run schema:gen
+      - uses: kjanat/beepboop/actions/prepare@e7d916f27126cc7e47af904e8888cfb9b180c8e4 # v1
+        with: { mode: submit, context: "${{ steps.release.outputs.context }}" }

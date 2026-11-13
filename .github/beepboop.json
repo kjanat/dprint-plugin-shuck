@@ -1,0 +1,68 @@
+{
+	"$schema": "https://beepboop.kjanat.dev/schema/v1.json",
+	"managers": [
+		"cargo",
+		"github-release",
+		"workflow"
+	],
+	"streams": {
+		"main": {
+			"versionScope": "one-for-stream",
+			"versionFiles": [
+				{
+					"path": "Cargo.toml",
+					"format": "toml",
+					"key": [
+						"package",
+						"version"
+					]
+				},
+				{
+					"path": "schema.json",
+					"format": "json",
+					"key": [
+						"$id"
+					],
+					"template": "https://plugins.dprint.dev/kjanat/shuck/{version}/schema.json"
+				}
+			],
+			"prepare": {
+				"strategy": "managed",
+				"versionLands": "via-version-pr",
+				"versionPrMerge": "squash",
+				"workflow": {
+					"file": "prepare-release.yml",
+					"ref": "master",
+					"mode": "dispatch"
+				}
+			},
+			"promote": {
+				"publishWhen": "approved-in-beepboop",
+				"workflow": {
+					"file": "publish-release.yml",
+					"ref": "master",
+					"mode": "dispatch",
+					"refs": {
+						"phase": "version",
+						"prefix": ""
+					},
+					"publications": [
+						"github-release:kjanat/dprint-plugin-shuck"
+					]
+				}
+			},
+			"startFrom": [
+				{
+					"via": "dashboard"
+				},
+				{
+					"via": "action",
+					"workflow": "release.yml"
+				}
+			],
+			"mustPublish": [
+				"github-release:kjanat/dprint-plugin-shuck"
+			]
+		}
+	}
+}
