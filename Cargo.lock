@@ -303,9 +303,9 @@ dependencies = [
 
 [[package]]
 name = "shuck-formatter"
-version = "0.2.10"
+version = "0.2.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f87e326f045a16c61880580b10018fb5501fa429c2702bf48f397623c2cb0be"
+checksum = "7a99065579ba82e6b703020d30c180bfed8171f5296376bcb769f7728aa499f6"
 dependencies = [
  "memchr",
  "rustc-hash",
