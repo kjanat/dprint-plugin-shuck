@@ -56,7 +56,8 @@ are relative to the repository root. `--wasm-path` takes precedence over
 
 Start a release from the Beepboop dashboard: select this repository and the
 `main` stream, enter the next plugin version, and select **Release**. The
-GitHub Actions **Release** workflow accepts the same target version.
+GitHub Actions **Release** workflow accepts the same target version on `master`.
+Beepboop reads the current release version from the unprefixed Git tags.
 
 Beepboop opens a signed version PR as its App bot. Preparation updates
 `Cargo.toml`, `Cargo.lock`, and the versioned `schema.json` URL together.
