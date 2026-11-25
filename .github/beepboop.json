@@ -4,6 +4,7 @@
   "streams": {
     "main": {
       "versionScope": "one-for-stream",
+      "versionSource": { "kind": "tags", "prefix": "" },
       "versionFiles": [
         {
           "path": "Cargo.toml",

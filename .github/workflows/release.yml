@@ -16,5 +16,5 @@ jobs:
     if: github.repository == 'kjanat/dprint-plugin-shuck'
     runs-on: ubuntu-26.04
     steps:
-      - uses: kjanat/beepboop/actions/release@e7d916f27126cc7e47af904e8888cfb9b180c8e4 # v1
+      - uses: kjanat/beepboop/actions/release@6b0b66969afc840d52f4082eec0e49155f555746 # v1
         with: { stream: main, version: "${{ inputs.version }}" }
